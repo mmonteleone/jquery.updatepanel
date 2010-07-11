@@ -6,7 +6,45 @@ Kind of like a BMW Taurus
 What?
 -----
 
+A plugin and example of proxying ASP.NET AJAX client-side events that occur around usage of UpdatePanels as native jQuery events via the jQuery Special Events API.  
+
+So, instead of having to do:
+
+    Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function(sender, args) {
+        console.log('update panel just finished');
+    });
     
+You can stay "jQuery-native" with:
+
+    $(document).bind('atlasEndRequest', function(){
+        console.log('update panel just finished');
+    });
+    
+And you can even use a shortcut alias:
+
+    $(document).atlasEndRequest(function(){
+        console.log('update panel just finished');
+    });    
+    
+It also still passes in the sender and args, if you're interested:
+
+    $(document).bind('atlasEndRequest', function(e, data){
+        console.log(data.sender);
+        console.log(data.args);
+    });
+    
+### Exposed events:
+
+The following PageRequestManager events are wrapped/exposted as jQuery-native events.
+
+ * [initializeRequest](http://msdn.microsoft.com/en-us/library/bb397460.aspx) as `atlasInitializeRequest`
+ * [beginRequest](http://msdn.microsoft.com/en-us/library/bb397432.aspx) as `atlasBeginRequest`
+ * [endRequest](http://msdn.microsoft.com/en-us/library/bb383810.aspx) as `atlasEndRequest`
+ * [pageLoading](http://msdn.microsoft.com/en-us/library/bb383832.aspx) as `atlasPageLoading`
+ * [pageLoaded](http://msdn.microsoft.com/en-us/library/bb397523.aspx) as `atlasPageLoaded`
+
+More information available here:  
+[http://michaelmonteleone.net/2010/07/09/proxying-asp.net-ajax-events-with-jquery/](http://michaelmonteleone.net/2010/07/09/proxying-asp.net-ajax-events-with-jquery/)
 
 Requirements, installation, and notes
 -------------------------------------
@@ -17,9 +55,6 @@ jQuery.updatepanel requires [jquery][3] 1.3.2 or greater and can be installed th
     <script type="text/javascript" src="jquery.updatepanel.min.js"></script>
 
 jQuery.updatepanel includes a full unit test suite, and has been verified to work against Firefox 3.5, Safari 4, Internet Explorer 6,7,8, Chrome, and Opera 9 and 10.  Please feel free to test its suite against other browsers.
-
-Complete API
-------------
 
 Changelog
 ---------
@@ -57,6 +92,3 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 [3]: http://jquery.com "jQuery"
 [4]: http://github.com/mmonteleone/pavlov "Pavlov"
 [6]: http://code.google.com/p/js-test-driver/ "JsTestDriver"
-[7]: http://github.com/mmonteleone/jquery.updatepanel/raw/master/jquery.updatepanel.js "raw updatepanel script"
-[8]: http://cloud.github.com/downloads/mmonteleone/jquery.updatepanel/jquery.updatepanel.zip "jQuery.updatepanel Release"
-[9]: http://github.com/mmonteleone/jquery.netchanger "jQuery.netchanger"

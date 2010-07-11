@@ -6,10 +6,12 @@ var pageRequestManagerInstance = {
     add_initializeRequest: function(){},
     add_beginRequest: function(){},
     add_endRequest: function(){},
+    add_pageLoading: function(){},
     add_pageLoaded: function(){},
     remove_initializeRequest: function(){},
     remove_beginRequest: function(){},
     remove_endRequest: function(){},
+    remove_pageLoading: function(){},
     remove_pageLoaded: function(){}
 };
 /* fake namespace and singleton wrapper around
@@ -280,7 +282,76 @@ QUnit.specify("jQuery.updatepanel", function() {
                         assert(callCount).equals(0);
                     });
                 });
-            });
+            });            
+            describe("atlasPageLoading", function(){
+                it("should be triggered on document when handler called", function(){
+                    var capturedHandler;
+                    mockRequestManager("add_pageLoading", function(handler){
+                        capturedHandler = handler;
+                    }, function(){
+                        var callCount = 0;
+                        // bind a handler to the pageLoading event
+                        $(document).bind('atlasPageLoading.spec', function(){
+                            callCount++;
+                        });
+                        // call the handler that the page request manager
+                        // would.  we're not testing that *it* works, just that
+                        // the plugin's handler does the right thing when called.
+                        capturedHandler();
+                        capturedHandler();
+                        capturedHandler();
+                        assert(callCount).equals(3);
+                    });
+                });
+                describe("upon binding", function(){
+                    it("should register the callback with manager", function(){
+                        mockRequestManager("add_pageLoading", function(handler) {
+                            assert(handler).isFunction();
+                        }, function(){
+                            $(document).bind('atlasPageLoading.spec', function(){});
+                        });
+                    });
+                    it("should only register the callback on the first bind", function(){
+                        var callCount = 0;
+                        mockRequestManager("add_pageLoading", function(handler){
+                            callCount++;
+                        }, function(){
+                            // bind 4 times.  should only set up event once
+                            $(document).bind('atlasPageLoading.spec', function(){});
+                            $(document).bind('atlasPageLoading.spec', function(){});
+                            $(document).bind('atlasPageLoading.spec', function(){});
+                            $(document).bind('atlasPageLoading.spec', function(){});
+                        });
+                        assert(callCount).equals(1);
+                    });
+                });
+                describe("upon unbinding", function(){
+                    it("it should unregister the callback with manager", function(){
+                        mockRequestManager("remove_pageLoading", function(handler) {
+                            assert(handler).isFunction();
+                        }, function(){
+                            var handler = function(){};
+                            $(document).bind('atlasPageLoading.spec', handler);
+                            $(document).unbind('atlasPageLoading.spec', handler);
+                        });
+                    });
+                    it("it should not unregister callback if not last call to unbind", function(){
+                        var callCount = 0;
+                        mockRequestManager("remove_pageLoading", function(handler) {
+                            callCount++;
+                        }, function(){
+                            var handler = function(){}
+                            // bind three times
+                            $(document).bind('atlasPageLoading.spec', handler);
+                            $(document).bind('atlasPageLoading.spec', function(){});
+                            $(document).bind('atlasPageLoading.spec', function(){});
+                            // only unbind twice, so shouldn't tear down event yet
+                            $(document).unbind('atlasPageLoading.spec', handler);
+                        });
+                        assert(callCount).equals(0);
+                    });
+                });
+            });                        
             describe("atlasPageLoaded", function(){
                 it("should be triggered on document when handler called", function(){
                     var capturedHandler;
@@ -435,6 +506,34 @@ QUnit.specify("jQuery.updatepanel", function() {
                 });
             });
         });
+        describe("jQuery.fn.atlasPageLoading", function(){
+            describe("when passed a function", function(){
+                it("it should bind handler to atlasPageLoading event", function(){
+                    var doc = $(document),
+                        callBack = function(){},
+                        capturedCallback,
+                        event;
+                    mock(doc, 'bind', function(eventName, handler) {
+                        event = eventName;
+                        capturedCallback = handler;
+                    }, function(){
+                        doc.atlasPageLoading(callBack);
+                    });
+                    assert(capturedCallback).equals(callBack);
+                    assert(event).equals('atlasPageLoading');
+                });
+            });
+            describe("when not passed a function", function(){
+                it("it should trigger the event", function(){
+                    var callCount = 0;
+                    $(document).bind('atlasPageLoading', function(){
+                        callCount++;
+                    });
+                    $(document).atlasPageLoading();
+                    assert(callCount).equals(1);
+                });
+            });
+        });        
         describe("jQuery.fn.atlasPageLoaded", function(){
             describe("when passed a function", function(){
                 it("it should bind handler to atlasPageLoaded event", function(){

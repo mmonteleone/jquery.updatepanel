@@ -13,7 +13,7 @@
  */
  (function ($) {
      // list of all events this will wrap
-     var events = 'initializeRequest beginRequest endRequest pageLoaded';
+     var events = 'initializeRequest beginRequest endRequest pageLoading pageLoaded';
      $.each(events.split(' '), function (i, name) {
          // make a new camel-cased public 'atlas*' name for the event
          var mappedName = 'atlas' + name.substring(0, 1).toUpperCase() + name.substring(1),
